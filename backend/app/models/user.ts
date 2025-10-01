@@ -1,13 +1,18 @@
 import { DateTime } from 'luxon'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, beforeSave } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
+import Hash from '@adonisjs/hash'  
 
 const AuthFinder = withAuthFinder(
   () => ({
-    verify: async (plain: string, stored: string) => plain === stored, 
-    make: async (value: string) => value, 
+    verify: async (plain: string, stored: string) => {
+      return Hash.verify(stored, plain)   
+    },
+    make: async (value: string) => {
+      return Hash.make(value)           
+    },
   }),
   {
     uids: ['email'],
@@ -35,4 +40,12 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare updatedAt: DateTime | null
 
   static accessTokens = DbAccessTokensProvider.forModel(User)
+
+ 
+  @beforeSave()
+  static async hashPassword(user: User) {
+    if (user.$dirty.password) {
+      user.password = await Hash.make(user.password)
+    }
+  }
 }

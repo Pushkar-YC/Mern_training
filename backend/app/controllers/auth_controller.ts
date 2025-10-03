@@ -25,6 +25,7 @@ export default class AuthController {
   async login({ request }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
 
+    // ✅ verifyCredentials handles password hashing check
     const user = await User.verifyCredentials(email, password)
     const token = await User.accessTokens.create(user)
 
@@ -40,6 +41,7 @@ export default class AuthController {
       token,
     }
   }
+
 
   async logout({ auth }: HttpContext) {
     await auth.check()

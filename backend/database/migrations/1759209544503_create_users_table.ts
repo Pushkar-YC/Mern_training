@@ -1,5 +1,7 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
+
+
 export default class extends BaseSchema {
   protected tableName = 'users'
 
@@ -11,6 +13,7 @@ export default class extends BaseSchema {
       table.string('password').notNullable()
       table.string('emailVerificationToken').nullable()
       table.boolean('isEmailVerified').defaultTo(false)
+      table.string('avatar').nullable();
 
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()

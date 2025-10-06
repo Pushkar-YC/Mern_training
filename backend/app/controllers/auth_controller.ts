@@ -3,6 +3,7 @@ import { loginValidator, registerValidator } from '#validators/auth'
 import type { HttpContext } from '@adonisjs/core/http'
 import { ServiceProviderService } from '#services/service_provider_service'
 
+
 export default class AuthController {
   //use this function for verfiying the user's email
   async verifyEmail({ params, response }: HttpContext) {
@@ -17,6 +18,7 @@ export default class AuthController {
     const data = await request.validateUsing(registerValidator)
     await ServiceProviderService.registerUser(data)
 
+   
     return response.json({
       message: 'Registration successful. Please check your email to verify your account.',
     })
@@ -91,4 +93,20 @@ export default class AuthController {
       return response.unauthorized({ message: 'Invalid or expired token ❌' })
     }
   }
+
+  //controlller for uploading the file golus
+  // async uploadFile({ request, response }: HttpContext) {
+  //   const filePath = request.param('*').join(sep)
+  //   const normalizedPath = normalize(filePath)
+
+  //   if (PATH_TRAVERSAL_REGEX.test(normalizedPath)) {
+  //     return response.badRequest('Malformed path')
+  //   }
+
+  //   const absolutePath = app.makePath(
+  //     '/Users/dell/Desktop/Code/Adonis/authentication1/backend//uploads',
+  //     normalizedPath
+  //   )
+  //   return response.download(absolutePath)
+  // }
 }

@@ -1,47 +1,55 @@
 import User from '#models/user'
 import { loginValidator, registerValidator } from '#validators/auth'
 import type { HttpContext } from '@adonisjs/core/http'
+import { ServiceProviderService } from '#services/service_provider_service'
 
 export default class AuthController {
-  async register({ request }: HttpContext) {
-    const data = await request.validateUsing(registerValidator)
+  //use this function for verfiying the user's email
+  async verifyEmail({ params, response }: HttpContext) {
+    const user = await User.find(params.id)
 
-    const user = await User.create(data)
-    const token = await User.accessTokens.create(user)
+    await ServiceProviderService.verifyEmail(user)
 
-    return {
-      message: 'User registered successfully ✅',
-      user: {
-        id: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
-      token,
-    }
+    return response.json({ message: 'Email verified successfully ✅' })
   }
 
-  async login({ request }: HttpContext) {
+  async register({ request, response }: HttpContext) {
+    const data = await request.validateUsing(registerValidator)
+    await ServiceProviderService.registerUser(data)
+
+    return response.json({
+      message: 'Registration successful. Please check your email to verify your account.',
+    })
+  }
+
+  async login({ request, response }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
+    const { token, user } = await ServiceProviderService.loginUser(email, password)
+
+    return response.ok({
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        email: user.email,
+      },
+      token: token.token,
+    })
 
     // ✅ verifyCredentials handles password hashing check
-    const user = await User.verifyCredentials(email, password)
-    const token = await User.accessTokens.create(user)
-
-    return {
-      message: 'Login successful ✅',
-      user: {
-        id: user.id,
-        fullName: user.fullName,
-        email: user.email,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
-      token,
-    }
+    // const user = await User.verifyCredentials(email, password)
+    // const token = await User.accessTokens.create(user)
+    // return {
+    //   message: 'Login successful ✅',
+    //   user: {
+    //     id: user.id,
+    //     fullName: user.fullName,
+    //     email: user.email,
+    //     createdAt: user.createdAt,
+    //     updatedAt: user.updatedAt,
+    //   },
+    //   token,
+    // }
   }
-
 
   async logout({ auth }: HttpContext) {
     await auth.check()

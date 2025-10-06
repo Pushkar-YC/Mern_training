@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column, beforeSave } from '@adonisjs/lucid/orm'
+import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import hash from '@adonisjs/core/services/hash'
@@ -20,14 +20,14 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare email: string
 
-  @column()
-  public is_verified: boolean = false
-
-  @column()
-  public verification_token: string | null = null
-
   @column({ serializeAs: null })
   declare password: string
+
+  @column({ columnName: 'emailVerificationToken' })
+  declare emailVerificationToken: string
+
+  @column({ columnName: 'isEmailVerified' })
+  public isEmailVerified: boolean = false
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
